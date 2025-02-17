@@ -77,7 +77,7 @@ END:VCARD
         </p>
         <Button
           onClick={generateVCard}
-          className="mt-6 sm:mt-8 px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 text-white text-lg sm:text-xl font-semibold rounded-md shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out"
+          className="mt-6 sm:mt-8 px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 text-white text-lg sm:text-xl font-semibold rounded-sm shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out"
         >
           Save Contact
         </Button>
