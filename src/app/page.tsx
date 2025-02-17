@@ -1,38 +1,48 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button"; // Certifique-se de que esse caminho esteja correto
+
+// Função para converter a imagem para Base64
+const convertImageToBase64 = (imgPath: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const image = new Image() as HTMLImageElement; // Explicitamente tipado como HTMLImageElement
+    image.src = imgPath;
+
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = image.width;
+      canvas.height = image.height;
+      ctx?.drawImage(image, 0, 0);
+      resolve(canvas.toDataURL("image/jpeg"));
+    };
+
+    image.onerror = (error) => reject(error);
+  });
+};
 
 export default function Home() {
   const [base64Image, setBase64Image] = useState<string | null>(null);
 
-  // Função para converter a imagem em Base64
-  const getBase64Image = (imgUrl: string) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "Anonymous"; // Permite carregar imagens de domínios externos
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        ctx?.drawImage(img, 0, 0);
-        resolve(canvas.toDataURL("image/jpeg")); // Converte a imagem para Base64 (formato JPEG)
-      };
-      img.onerror = (error) => reject(error);
-      img.src = "/logoTurbo.jpg"; // Caminho para a nova imagem
-    });
-  };
-
   // Efeito para carregar a imagem em Base64 quando o componente for montado
   useEffect(() => {
-    getBase64Image("/logoTurbo.jpg").then((base64) => {
-      setBase64Image(base64 as string);
-    });
+    convertImageToBase64("/logoTurbo.jpg") // Caminho para logoTurbo.jpg na pasta public
+      .then((base64) => {
+        setBase64Image(base64);
+      })
+      .catch((error) => {
+        console.error("Erro ao carregar a imagem:", error);
+      });
   }, []);
 
   // Função para gerar o vCard
   const generateVCard = () => {
+    if (!base64Image) {
+      alert("A imagem ainda não foi carregada.");
+      return;
+    }
+
     const vCardData = `
 BEGIN:VCARD
 VERSION:3.0
@@ -41,7 +51,7 @@ ORG:Turbo Detail
 TEL:+1-519-918-6506
 EMAIL:cauecatonesilva@gmail.com
 URL:https://turbo-detail.vercel.app
-PHOTO;ENCODING=BASE64;TYPE=JPEG:${base64Image}
+PHOTO;ENCODING=BASE64;TYPE=JPEG:${base64Image.split(',')[1]}
 NOTE:Premium Auto Detailing Services in Toronto, ON.
 END:VCARD
     `;
@@ -57,10 +67,12 @@ END:VCARD
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
-      {/* Imagem ocupando 100% da largura com suavização */}
+      {/* Imagem otimizada utilizando o componente Image */}
       <img
-        src="/logoTurbo.jpg"
+        src="/logoTurbo.jpg" // Usando o caminho correto da imagem
         alt="Turbo Detail Logo"
+        width={1200} // Largura da imagem
+        height={500} // Altura da imagem
         className="w-full h-[45vh] object-cover object-center opacity-80 hover:opacity-100 transition-opacity duration-700"
       />
 
@@ -75,8 +87,9 @@ END:VCARD
         <p className="text-gray-400 text-sm sm:text-base">
           📍 Toronto, ON | 📞 (519) 918-6506 | 📧 cauecatonesilva@gmail.com
         </p>
+        {/* Botão para salvar o contato */}
         <Button
-          onClick={generateVCard}
+          onClick={generateVCard} // Passando a função que gera o vCard
           className="mt-6 sm:mt-8 px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 text-white text-lg sm:text-xl font-semibold rounded-sm shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out"
         >
           Save Contact
